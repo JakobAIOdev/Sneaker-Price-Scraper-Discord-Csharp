@@ -1,0 +1,13 @@
+
+# Exclude all .sln files in any subdirectory
+**/*.sln
+# Exclude all bin directories in any subdirectory
+**/bin/
+# Exclude all obj directories in any subdirectory
+**/obj/
+# Exclude .DS_Store files  
+**/.DS_Store
+# Exclude .vs directories
+**/.vs/
+# Exclude .vscode directories
+**/.vscode/
