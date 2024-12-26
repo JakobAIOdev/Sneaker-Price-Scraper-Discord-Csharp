@@ -5,6 +5,16 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
 
 
+string PrintList(List<string> list)
+{
+    string result = "";
+    foreach (var item in list)
+    {
+        result += item + "\n";
+    }
+    return result;
+}
+
 
 // funktion to get the product URL by the SKU
 string UrlRequest (string SKU)
@@ -40,64 +50,70 @@ string UrlRequest (string SKU)
     return productUrl;
 }
 
-//UrlRequest("DZ5485-612");
-
 List<string> GetSizePrices(string SKU)
 {
-    var web = new HtmlWeb();
-    // connect to target page
-    var document = web.Load(UrlRequest(SKU));
-        
-    // print the raw HTML as a string 
-    //Console.WriteLine(document.DocumentNode.OuterHtml);
-    var sizes = document.DocumentNode.SelectNodes("//*[@id='page-product']/div[1]/div[1]/div[2]/div/div[1]/div[1]/div[2]/div[2]");
+    var HttpClient = new HttpClient();
+    var html = HttpClient.GetStringAsync(UrlRequest(SKU)).Result;
+    var htmldoc = new HtmlDocument();
+    htmldoc.LoadHtml(html);
 
-    List<string> sizesPrices = new List<string>();
-    foreach (var size in sizes)
+    List<string> sizePrices = new List<string>();
+
+    var sizes = htmldoc.DocumentNode.SelectNodes("//div[contains(@class, 'size available')]");
+
+    if (sizes != null)
     {
-        sizesPrices.Add(size.InnerText);
+        foreach (var size in sizes)
+        {
+            var sizeLabel = size.SelectSingleNode(".//div[@class='label']")?.InnerText.Trim();
+            var price = size.SelectSingleNode(".//div[@class='price']//span")?.InnerText.Trim();
+            var salesCount = size.GetAttributeValue("data-seller-sales-count", "").Replace("sales", "").Trim('(', ')').Trim();
+
+            if (!string.IsNullOrEmpty(sizeLabel) && !string.IsNullOrEmpty(price))
+            {
+                sizePrices.Add($"{sizeLabel}: {price} (Seller has {salesCount} sales)");
+            }
+        }
     }
 
-    return sizesPrices;
+    return sizePrices;
 }
 
 
-List<string> GetSizePricesCleaned(string SKU)
+List<string> GetSizePayoutPrices(string SKU)
 {
-    List<string> sizesPrices = GetSizePrices(SKU);
-    List<string> sizesPricesCleaned = new List<string>();
-    foreach (var sizePrice in sizesPrices)
+    var HttpClient = new HttpClient();
+    var html = HttpClient.GetStringAsync(UrlRequest(SKU)).Result;
+    var htmldoc = new HtmlDocument();
+    htmldoc.LoadHtml(html);
+
+    List<string> sizePrices = new List<string>();
+
+    var sizes = htmldoc.DocumentNode.SelectNodes("//div[contains(@class, 'size available')]");
+
+    if (sizes != null)
     {
-        sizesPricesCleaned.Add(sizePrice.Replace("\n", "").Trim());
+        foreach (var size in sizes)
+        {
+            var sizeLabel = size.SelectSingleNode(".//div[@class='label']")?.InnerText.Trim();
+            var priceText = size.SelectSingleNode(".//div[@class='price']//span")?.InnerText.Trim();
+            var salesCount = size.GetAttributeValue("data-seller-sales-count", "").Replace("sales", "").Trim('(', ')').Trim();
+
+            if (!string.IsNullOrEmpty(sizeLabel) && !string.IsNullOrEmpty(priceText))
+            {
+                var priceValue = decimal.Parse(priceText.Replace("€", "").Trim());
+                var calculatedPrice = priceValue * 0.915m - 15;
+
+                sizePrices.Add($"{sizeLabel}: {calculatedPrice:F2} € (Seller has: {salesCount} sales)");
+            }
+        }
     }
-    return sizesPricesCleaned;
+
+    return sizePrices;
 }
 
-string PrintList(List<string> list)
-{
-    string result = "";
-    foreach (var item in list)
-    {
-        result += item + "\n";
-    }
-    return result;
-}
-
-//System.Console.WriteLine(PrintList(GetSizePricesCleaned("DZ5485-612")));
-
-void Clean(List<string> rawList)
-{
-    List<string> cleanedList = rawList
-        .Select(item => Regex.Replace(item.Trim(), @"\s{2,}", " "))
-        .Where(item => !string.IsNullOrWhiteSpace(item) && item.Contains("€"))
-        .Select(item => item.Replace(" ", ":"))
-        .ToList();
-
-    foreach (var item in cleanedList)
-    {
-        Console.WriteLine(item);
-    }
-}
-
-
-Clean(GetSizePricesCleaned("DZ5485-612"));
+System.Console.WriteLine("Payout Prices:");
+System.Console.WriteLine(PrintList(GetSizePayoutPrices("DZ5485-612")));
+System.Console.WriteLine("--------------------");
+System.Console.WriteLine("Prices:");
+System.Console.WriteLine(PrintList(GetSizePrices("DZ5485-612")));
