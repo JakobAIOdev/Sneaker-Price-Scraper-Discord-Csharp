@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 using Microsoft.VisualBasic;
 
 
+// string SKU = "DZ5485-612";
+bool includeSales = true;
+
 string PrintList(List<string> list)
 {
     string result = "";
@@ -64,6 +67,25 @@ string GetProductTitle(string SKU)
 
 //System.Console.WriteLine(GetProductTitle("DZ5485-612"));
 
+string GetProductImg(string SKU)
+{
+    var HttpClient = new HttpClient();
+    var html = HttpClient.GetStringAsync(UrlRequest(SKU)).Result;
+    var htmldoc = new HtmlDocument();
+    htmldoc.LoadHtml(html);
+
+    var imgNode = htmldoc.DocumentNode.SelectSingleNode("//div[@class='item']//img");
+
+    if (imgNode != null)
+    {
+        var imgSrc = imgNode.GetAttributeValue("data-src", "");
+        return imgSrc;
+    }
+
+    return "Kein Bild gefunden";
+}
+//System.Console.WriteLine(GetProductImg("DZ5485-612"));
+
 
 List<string> GetSizePrices(string SKU)
 {
@@ -86,7 +108,14 @@ List<string> GetSizePrices(string SKU)
 
             if (!string.IsNullOrEmpty(sizeLabel) && !string.IsNullOrEmpty(price))
             {
-                sizePrices.Add($"{sizeLabel}: {price} (Seller has {salesCount} sales)");
+                if(includeSales)
+                {
+                    sizePrices.Add($"{sizeLabel}: {price} (Seller has {salesCount} sales)");
+                }
+                else
+                {
+                    sizePrices.Add($"{sizeLabel}: {price }");
+                }
             }
         }
     }
@@ -119,7 +148,14 @@ List<string> GetSizePayoutPrices(string SKU)
                 var priceValue = decimal.Parse(priceText.Replace("€", "").Trim());
                 var calculatedPrice = priceValue * 0.915m - 15;
 
-                sizePrices.Add($"{sizeLabel}: {calculatedPrice:F2} € (Seller has: {salesCount} sales)");
+                if(includeSales)
+                {
+                    sizePrices.Add($"{sizeLabel}: {calculatedPrice:F2} € (Seller has: {salesCount} sales)");
+                }
+                else
+                {
+                    sizePrices.Add($"{sizeLabel}: {calculatedPrice:F2} €");
+                }
             }
         }
     }
@@ -127,10 +163,9 @@ List<string> GetSizePayoutPrices(string SKU)
     return sizePrices;
 }
 
-/*
+
 System.Console.WriteLine("Payout Prices:");
 System.Console.WriteLine(PrintList(GetSizePayoutPrices("DZ5485-612")));
 System.Console.WriteLine("--------------------");
 System.Console.WriteLine("Prices:");
 System.Console.WriteLine(PrintList(GetSizePrices("DZ5485-612")));
-*/
