@@ -74,17 +74,19 @@ string GetProductImg(string SKU)
     var htmldoc = new HtmlDocument();
     htmldoc.LoadHtml(html);
 
-    var imgNode = htmldoc.DocumentNode.SelectSingleNode("//div[@class='item']//img");
+   var imgNode = htmldoc.DocumentNode.SelectSingleNode("//img[contains(@src, 'hypeboost.com')]");
 
     if (imgNode != null)
     {
-        var imgSrc = imgNode.GetAttributeValue("data-src", "");
+        var imgSrc = imgNode.GetAttributeValue("src", "");
         return imgSrc;
     }
 
-    return "Kein Bild gefunden";
+    return "No picture found";
 }
-//System.Console.WriteLine(GetProductImg("DZ5485-612"));
+
+
+System.Console.WriteLine(GetProductImg("DZ5485-612"));
 
 
 List<string> GetSizePrices(string SKU)
@@ -163,9 +165,10 @@ List<string> GetSizePayoutPrices(string SKU)
     return sizePrices;
 }
 
-
+/*
 System.Console.WriteLine("Payout Prices:");
 System.Console.WriteLine(PrintList(GetSizePayoutPrices("DZ5485-612")));
 System.Console.WriteLine("--------------------");
 System.Console.WriteLine("Prices:");
 System.Console.WriteLine(PrintList(GetSizePrices("DZ5485-612")));
+*/
