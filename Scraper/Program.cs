@@ -50,6 +50,21 @@ string UrlRequest (string SKU)
     return productUrl;
 }
 
+string GetProductTitle(string SKU)
+{
+    var HttpClient = new HttpClient();
+    var html = HttpClient.GetStringAsync(UrlRequest(SKU)).Result;
+    var htmldoc = new HtmlDocument();
+    htmldoc.LoadHtml(html);
+
+    string productTitle = htmldoc.DocumentNode.SelectSingleNode("//h1")?.InnerText.Trim() ?? string.Empty;
+
+    return productTitle;
+}
+
+//System.Console.WriteLine(GetProductTitle("DZ5485-612"));
+
+
 List<string> GetSizePrices(string SKU)
 {
     var HttpClient = new HttpClient();
@@ -112,8 +127,10 @@ List<string> GetSizePayoutPrices(string SKU)
     return sizePrices;
 }
 
+/*
 System.Console.WriteLine("Payout Prices:");
 System.Console.WriteLine(PrintList(GetSizePayoutPrices("DZ5485-612")));
 System.Console.WriteLine("--------------------");
 System.Console.WriteLine("Prices:");
 System.Console.WriteLine(PrintList(GetSizePrices("DZ5485-612")));
+*/
