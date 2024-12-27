@@ -1,5 +1,6 @@
 # Sneaker Price Scraper Discord Hypeboost
 
+## Only Hypeboost is working as of now!
 This project is a sneaker price scraper that allows users to query sneaker prices on Hypeboost using Discord commands.
 
 The bot fetches the latest prices for sneakers from Hypeboost, and displays them in a clean and organized manner on Discord.
