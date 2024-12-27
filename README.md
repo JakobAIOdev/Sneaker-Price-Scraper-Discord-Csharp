@@ -45,7 +45,7 @@ Multiple Commands: Users can enter different commands to query different types o
 1. Clone the repository:
 
 ```
-git clone git@github.com:JakobAIOdev/Sneaker-Price-Scraper-Csharp.git
+git clone git@github.com:JakobAIOdev/Sneaker-Price-Scraper-Discord-Csharp.git
 ```
 
 2. Input your Discord-Bot-Token in the **Program.cs**
