@@ -4,7 +4,9 @@ using Discord.WebSocket;
 class Program
 {
     private DiscordSocketClient? _client;
-    private bool includeSales = false;
+    private bool includeSales = false; // Include sales information in embeds
+
+    private readonly string botToken = ""; // Your bot token here
 
     static void Main(string[] args) => new Program().RunBotAsync().GetAwaiter().GetResult();
 
@@ -17,9 +19,6 @@ class Program
 
         _client.Log += Log;
         _client.MessageReceived += HandleCommandAsync;
-
-
-        string botToken = "";
 
         await _client.LoginAsync(TokenType.Bot, botToken);
         await _client.StartAsync();
