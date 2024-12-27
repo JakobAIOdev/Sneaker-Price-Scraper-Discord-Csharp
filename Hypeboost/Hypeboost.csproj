@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.11.71" />
+    <PackageReference Include="Discord.Net" Version="3.17.0" />
   </ItemGroup>
 
 </Project>
