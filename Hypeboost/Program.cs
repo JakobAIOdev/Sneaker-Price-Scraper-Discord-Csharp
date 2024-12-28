@@ -2,10 +2,10 @@
 using Discord.WebSocket;
 
 class Program
-{
+{ 
     private DiscordSocketClient? _client;
     private bool includeSales = false; // Include sales information in embeds
-    private string ebayRegion = EbayRegions.CO_UK; // Default eBay region
+    private string ebayRegion = EbayRegions.DE; // Default eBay region
 
     private readonly string botToken = ""; // Your bot token here
 
@@ -197,7 +197,7 @@ class Program
         Hypeboost hypeboost = new Hypeboost(sku, includeSales);
 
         var embed = new EmbedBuilder()
-            .WithTitle("Product URLs")
+            .WithTitle(hypeboost.GetProductTitle())
             .WithDescription("Differnt URLs for the product")
             .WithColor(Color.Blue)
             .WithThumbnailUrl(hypeboost.GetProductImg());
