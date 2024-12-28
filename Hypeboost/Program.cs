@@ -5,6 +5,7 @@ class Program
 {
     private DiscordSocketClient? _client;
     private bool includeSales = false; // Include sales information in embeds
+    private string ebayRegion = EbayRegions.CO_UK; // Default eBay region
 
     private readonly string botToken = ""; // Your bot token here
 
@@ -69,6 +70,11 @@ class Program
             System.Console.WriteLine("PayPal command received");
             await SendPayPalEmbed(message);
         }
+        else if (message.Content.StartsWith("!url"))
+        {
+            System.Console.WriteLine("Url command received");
+            await SendUrlEmbed(message);
+        }
         else if (message.Content.StartsWith("!help"))
         {
             System.Console.WriteLine("Help command received");
@@ -78,43 +84,89 @@ class Program
 
     private async Task SendPayoutPricesInEmbed(SocketMessage message)
     {
-        string sku = message.Content.Substring(8).Trim();
-        Hypeboost hypeboost = new Hypeboost(sku, includeSales);
-        var embed = new EmbedBuilder()
-            .WithTitle(hypeboost.GetProductTitle())
-            .WithDescription("Payout prices on Hypeboost")
-            .WithColor(Color.Blue)
-            .WithThumbnailUrl(hypeboost.GetProductImg())
-            .WithUrl(hypeboost.ProductUrl);
+        string rawSku = message.Content.Substring(8).Trim();
+        if(rawSku.Contains(","))
+        {
+            string[] skus = rawSku.Split(",");
+            foreach (string sku in skus)
+            {
+                Hypeboost hypeboost = new Hypeboost(sku, includeSales);
+                var embed = new EmbedBuilder()
+                    .WithTitle(hypeboost.GetProductTitle())
+                    .WithDescription("Payout prices on Hypeboost")
+                    .WithColor(Color.Blue)
+                    .WithThumbnailUrl(hypeboost.GetProductImg())
+                    .WithUrl(hypeboost.ProductUrl);
 
 
-        string priceText = string.Join("\n", hypeboost.GetSizePayoutPrices());
+                string priceText = string.Join("\n", hypeboost.GetSizePayoutPrices());
 
-        embed.AddField("Prices", priceText);
+                embed.AddField("Prices", priceText);
 
-        await message.Channel.SendMessageAsync(embed: embed.Build());
+                await message.Channel.SendMessageAsync(embed: embed.Build());
+            }
+        }
+        else
+        {
+            Hypeboost hypeboost = new Hypeboost(rawSku, includeSales);
+            var embed = new EmbedBuilder()
+                .WithTitle(hypeboost.GetProductTitle())
+                .WithDescription("Payout prices on Hypeboost")
+                .WithColor(Color.Blue)
+                .WithThumbnailUrl(hypeboost.GetProductImg())
+                .WithUrl(hypeboost.ProductUrl);
+
+
+            string priceText = string.Join("\n", hypeboost.GetSizePayoutPrices());
+
+            embed.AddField("Prices", priceText);
+
+            await message.Channel.SendMessageAsync(embed: embed.Build());
+        }
     }
 
     private async Task SendPricesInEmbed(SocketMessage message)
     {
-        string sku = message.Content.Substring(7).Trim();
-        Hypeboost hypeboost = new Hypeboost(sku, includeSales);
-        var embed = new EmbedBuilder()
-            .WithTitle(hypeboost.GetProductTitle())
-            .WithDescription("Prices on Hypeboost")
-            .WithColor(Color.Blue)
-            .WithThumbnailUrl(hypeboost.GetProductImg())
-            .WithUrl(hypeboost.ProductUrl)
-            .WithAuthor("HypeboostScraper", "https://github.com/JakobAIOdev", "https://www.reviewuk.co.uk/wp-content/uploads/2022/08/tok4mz0o2zi3dt92-400x400.jpg");
+        string rawSku = message.Content.Substring(7).Trim();
+        if(rawSku.Contains(","))
+        {
+            string[] skus = rawSku.Split(",");
+            foreach (string sku in skus)
+            {
+                Hypeboost hypeboost = new Hypeboost(sku, includeSales);
+                var embed = new EmbedBuilder()
+                    .WithTitle(hypeboost.GetProductTitle())
+                    .WithDescription("Prices on Hypeboost")
+                    .WithColor(Color.Blue)
+                    .WithThumbnailUrl(hypeboost.GetProductImg())
+                    .WithUrl(hypeboost.ProductUrl)
+                    .WithAuthor("HypeboostScraper", "https://github.com/JakobAIOdev", "https://www.reviewuk.co.uk/wp-content/uploads/2022/08/tok4mz0o2zi3dt92-400x400.jpg");
 
 
-        string priceText = string.Join("\n", hypeboost.GetSizePrices());
+                string priceText = string.Join("\n", hypeboost.GetSizePrices());
 
-        embed.AddField("Prices", priceText);
-        embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
+                embed.AddField("Prices", priceText);
+                embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
 
 
-        await message.Channel.SendMessageAsync(embed: embed.Build());
+                await message.Channel.SendMessageAsync(embed: embed.Build());
+            }
+        }
+        else
+        {
+            Hypeboost hypeboost = new Hypeboost(rawSku, includeSales);
+            var embed = new EmbedBuilder()
+                .WithTitle(hypeboost.GetProductTitle())
+                .WithDescription("Prices on Hypeboost")
+                .WithColor(Color.Blue)
+                .WithThumbnailUrl(hypeboost.GetProductImg())
+                .WithUrl(hypeboost.ProductUrl)
+                .WithAuthor("HypeboostScraper", "https://github.com/JakobAIOdev", "https://www.reviewuk.co.uk/wp-content/uploads/2022/08/tok4mz0o2zi3dt92-400x400.jpg");
+            string priceText = string.Join("\n", hypeboost.GetSizePrices());
+            embed.AddField("Prices", priceText);
+            embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
+            await message.Channel.SendMessageAsync(embed: embed.Build());
+        }
     }
 
     private async Task SendPayPalEmbed(SocketMessage message)
@@ -132,6 +184,28 @@ class Program
         embed.AddField("Output Price", paypal.CalculatePayout().ToString("C", new System.Globalization.CultureInfo("de-DE")));
         embed.AddField("Fees", paypal.CalculateFees().ToString("C", new System.Globalization.CultureInfo("de-DE")));
         embed.AddField("Total", (paypal.CalculateFees() + priceFloat).ToString("C", new System.Globalization.CultureInfo("de-DE")));
+        embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
+
+        await message.Channel.SendMessageAsync(embed: embed.Build());
+    }
+
+    
+    private async Task SendUrlEmbed(SocketMessage message)
+    {
+        string sku = message.Content.Substring(4).Trim();
+        ProductUrls productUrls = new ProductUrls(sku);
+        Hypeboost hypeboost = new Hypeboost(sku, includeSales);
+
+        var embed = new EmbedBuilder()
+            .WithTitle("Product URLs")
+            .WithDescription("Differnt URLs for the product")
+            .WithColor(Color.Blue)
+            .WithThumbnailUrl(hypeboost.GetProductImg());
+
+        embed.AddField("Hypeboost: ", hypeboost.ProductUrl);
+        embed.AddField("GOAT: ", productUrls.GetGoatUrl());
+        embed.AddField("StockX: ", "Coming soon");
+        embed.AddField("Ebay: ", productUrls.GetEbayUrl(ebayRegion));
         embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
 
         await message.Channel.SendMessageAsync(embed: embed.Build());
