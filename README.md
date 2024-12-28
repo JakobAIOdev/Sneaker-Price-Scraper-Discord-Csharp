@@ -34,6 +34,8 @@ Multiple Commands: Users can enter different commands to query different types o
 + "!prices <SKU>" returns the listing prices for all avaible sizes of the given sku.
 
 + "!settings sales" gives the option to enable or disable the sales information of the seller in the embed message.
+  
++ "!paypal <amount> calculates the PayPal fees and the total amount.
 
 + "!help" for a list of all commands.
 
@@ -83,6 +85,9 @@ dotnet run
 <br>
 <img width="300" src="https://github.com/user-attachments/assets/0dfdb1b0-5c9b-4e05-b1d9-3dbc98e98a50" />
 
+!paypal 120
+<br>
+<img width="300" src="https://github.com/user-attachments/assets/cd07c9ac-f760-4958-9ee3-ddf0532ba6a9" />
 
 
 ---
