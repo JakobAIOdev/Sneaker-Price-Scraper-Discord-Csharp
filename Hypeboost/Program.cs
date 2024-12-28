@@ -64,6 +64,11 @@ class Program
                 await message.Channel.SendMessageAsync("Usage: !settings sales");
             }
         }
+        else if (message.Content.StartsWith("!paypal"))
+        {
+            System.Console.WriteLine("PayPal command received");
+            await SendPayPalEmbed(message);
+        }
         else if (message.Content.StartsWith("!help"))
         {
             System.Console.WriteLine("Help command received");
@@ -108,6 +113,26 @@ class Program
         embed.AddField("Prices", priceText);
         embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
 
+
+        await message.Channel.SendMessageAsync(embed: embed.Build());
+    }
+
+    private async Task SendPayPalEmbed(SocketMessage message)
+    {
+        string price = message.Content.Substring(7).Trim();
+        float priceFloat = float.Parse(price);
+        PayPal paypal = new PayPal(priceFloat);
+        var embed = new EmbedBuilder()
+            .WithTitle("PayPal Fees")
+            .WithDescription("Calculating PayPal fees")
+            .WithColor(Color.Blue)
+            .WithThumbnailUrl("https://www.paypalobjects.com/webstatic/icon/pp258.png");
+
+        embed.AddField("Input Price", priceFloat.ToString("C", new System.Globalization.CultureInfo("de-DE")));
+        embed.AddField("Output Price", paypal.CalculatePayout().ToString("C", new System.Globalization.CultureInfo("de-DE")));
+        embed.AddField("Fees", paypal.CalculateFees().ToString("C", new System.Globalization.CultureInfo("de-DE")));
+        embed.AddField("Total", (paypal.CalculateFees() + priceFloat).ToString("C", new System.Globalization.CultureInfo("de-DE")));
+        embed.AddField("Links", "[Twitter](https://x.com/jakobaio) | [GitHub](https://github.com/JakobAIOdev)");
 
         await message.Channel.SendMessageAsync(embed: embed.Build());
     }
