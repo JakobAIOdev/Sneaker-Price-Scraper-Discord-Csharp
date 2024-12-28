@@ -76,6 +76,11 @@ class Hypeboost
 
             string productTitle = htmldoc.DocumentNode.SelectSingleNode("//h1")?.InnerText.Trim() ?? string.Empty;
 
+            if(productTitle.Contains("&#039;"))
+            {
+                productTitle = productTitle.Replace("&#039;", "'");
+            }
+            
             return productTitle;
         }
         catch (Exception e)
